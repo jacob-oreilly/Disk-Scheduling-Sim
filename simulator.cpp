@@ -1,6 +1,7 @@
 #include <iostream>
 #include <array>
 #include <stdlib.h>
+#include <cmath>
 
 using namespace std;
 
@@ -213,7 +214,12 @@ void generateDistanceDecrease() {
 			}
 		} else {
 			int flag = rand() % 100;
-			int range = (testTrackList[max]-testTrackList[min]) / 7;
+			int range;
+			if ((max - testTrackList[i - 1]) > (testTrackList[i - 1] - min)) {
+				range = (max - testTrackList[i - 1]) / 7;
+			} else {
+				range = (testTrackList[i - 1] - min) / 7;
+			}
 			int greaterOrLess = rand() % 2;
 			if (flag < 51) {
 				testTrackList[i] = rand() % range + (testTrackList[i - 1] - (range / 2));
