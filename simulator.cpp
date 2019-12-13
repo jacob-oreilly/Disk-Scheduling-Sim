@@ -5,7 +5,7 @@
 
 using namespace std;
 
-int testTrackList[];
+int testTrackList[1000];
 int trackList[] = {55, 58, 39, 18, 90, 160, 150, 38, 184};
 int diskSize = 200;
 
@@ -196,6 +196,38 @@ void generateSameTrackAccess() {
 	}
 }
 
+void generateFarthestDistance() {
+	int max;
+	int min;
+	for (int i = 0; i < 1000; i++) {
+		if (i == 0) {
+			testTrackList[i] = rand() % 200;
+		} else if (i == 1) {
+			testTrackList[i] = rand() % 200;
+			if (testTrackList[i] > testTrackList[i - 1]) {
+				max = testTrackList[i];
+				min = testTrackList[i - 1];
+			} else {
+				max = testTrackList[i - 1];
+				min = testTrackList[i];
+			}
+		} else if ((rand() % 100) == 0) {
+			if ((testTrackList[i - 1] - min) > (max - testTrackList[i - 1])) {
+				testTrackList[i] = min;
+			} else {
+				testTrackList[i] = max;
+			}
+		} else {
+			testTrackList[i] = rand() % 200;
+			if (testTrackList[i] < min) {
+				min = testTrackList[i];
+			} else if (testTrackList[i] > max) {
+				max = testTrackList[i];
+			}
+		}
+	}
+}
+
 void generateDistanceDecrease() {
 	int min;
 	int max;
@@ -265,9 +297,95 @@ void generateDistanceDecrease() {
 }
 
 int main() {
-    cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
-    cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
-    cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
-    cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n";
+    // cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
+    // cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
+    // cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
+    // cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
+    // cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n";
+
+	cout << "Simulation one with the head starting at track 0.\n";
+	cout << "Simulation one with the head starting at track 100.\n";
+	cout << "Simulation one with the head starting at track 199.\n";
+
+	cout << "Simulation two with the head starting at track 0.\n";
+	cout << "Simulation two with the head starting at track 100.\n";
+	cout << "Simulation two with the head starting at track 199.\n";
+
+	cout << "Simulation three with the head starting at track 0.\n";
+	cout << "Simulation three with the head starting at track 100.\n";
+	cout << "Simulation three with the head starting at track 199.\n";
+
+	cout << "Simulation four with the head starting at track 0.\n";
+	cout << "Simulation four with the head starting at track 100.\n";
+	cout << "Simulation four with the head starting at track 199.\n";
+
+	cout << "Simulation five with the head starting at track 0.\n";
+	cout << "Simulation five with the head starting at track 100.\n";
+	cout << "Simulation five with the head starting at track 199.\n";
+
+
+
+	cout << "Simulation one with the head starting at track 0 and the probability of accessing the same track next is 10%.\n";
+	cout << "Simulation one with the head starting at track 100 and the probability of accessing the same track next is 10%.\n";
+	cout << "Simulation one with the head starting at track 199 and the probability of accessing the same track next is 10%.\n";
+
+	cout << "Simulation two with the head starting at track 0 and the probability of accessing the same track next is 10%.\n";
+	cout << "Simulation two with the head starting at track 100 and the probability of accessing the same track next is 10%.\n";
+	cout << "Simulation two with the head starting at track 199 and the probability of accessing the same track next is 10%.\n";
+
+	cout << "Simulation three with the head starting at track 0 and the probability of accessing the same track next is 10%.\n";
+	cout << "Simulation three with the head starting at track 100 and the probability of accessing the same track next is 10%.\n";
+	cout << "Simulation three with the head starting at track 199 and the probability of accessing the same track next is 10%.\n";
+
+	cout << "Simulation four with the head starting at track 0 and the probability of accessing the same track next is 10%.\n";
+	cout << "Simulation four with the head starting at track 100 and the probability of accessing the same track next is 10%.\n";
+	cout << "Simulation four with the head starting at track 199 and the probability of accessing the same track next is 10%.\n";
+
+	cout << "Simulation five with the head starting at track 0 and the probability of accessing the same track next is 10%.\n";
+	cout << "Simulation five with the head starting at track 100 and the probability of accessing the same track next is 10%.\n";
+	cout << "Simulation five with the head starting at track 199 and the probability of accessing the same track next is 10%.\n";
+
+
+
+	cout << "Simulation one with the head starting at track 0 and the probability of accessing the furthest track from the current track is 1%.\n";
+	cout << "Simulation one with the head starting at track 100 and the probability of accessing the furthest track from the current track is 1%.\n";
+	cout << "Simulation one with the head starting at track 199 and the probability of accessing the furthest track from the current track is 1%.\n";
+
+	cout << "Simulation two with the head starting at track 0 and the probability of accessing the furthest track from the current track is 1%.\n";
+	cout << "Simulation two with the head starting at track 100 and the probability of accessing the furthest track from the current track is 1%.\n";
+	cout << "Simulation two with the head starting at track 199 and the probability of accessing the furthest track from the current track is 1%.\n";
+
+	cout << "Simulation three with the head starting at track 0 and the probability of accessing the furthest track from the current track is 1%.\n";
+	cout << "Simulation three with the head starting at track 100 and the probability of accessing the furthest track from the current track is 1%.\n";
+	cout << "Simulation three with the head starting at track 199 and the probability of accessing the furthest track from the current track is 1%.\n";
+
+	cout << "Simulation four with the head starting at track 0 and the probability of accessing the furthest track from the current track is 1%.\n";
+	cout << "Simulation four with the head starting at track 100 and the probability of accessing the furthest track from the current track is 1%.\n";
+	cout << "Simulation four with the head starting at track 199 and the probability of accessing the furthest track from the current track is 1%.\n";
+
+	cout << "Simulation five with the head starting at track 0 and the probability of accessing the furthest track from the current track is 1%.\n";
+	cout << "Simulation five with the head starting at track 100 and the probability of accessing the furthest track from the current track is 1%.\n";
+	cout << "Simulation five with the head starting at track 199 and the probability of accessing the furthest track from the current track is 1%.\n";
+
+
+
+	cout << "Simulation one with the head starting at track 0 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
+	cout << "Simulation one with the head starting at track 100 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
+	cout << "Simulation one with the head starting at track 199 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
+
+	cout << "Simulation two with the head starting at track 0 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
+	cout << "Simulation two with the head starting at track 100 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
+	cout << "Simulation two with the head starting at track 199 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
+
+	cout << "Simulation three with the head starting at track 0 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
+	cout << "Simulation three with the head starting at track 100 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
+	cout << "Simulation three with the head starting at track 199 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
+
+	cout << "Simulation four with the head starting at track 0 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
+	cout << "Simulation four with the head starting at track 100 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
+	cout << "Simulation four with the head starting at track 199 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
+
+	cout << "Simulation five with the head starting at track 0 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
+	cout << "Simulation five with the head starting at track 100 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
+	cout << "Simulation five with the head starting at track 199 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
 }
