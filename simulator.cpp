@@ -1,8 +1,10 @@
 #include <iostream>
 #include <array>
+#include <stdlib.h>
 
 using namespace std;
 
+int testTrackList[];
 int trackList[] = {55, 58, 39, 18, 90, 160, 150, 38, 184};
 int diskSize = 200;
 
@@ -169,6 +171,64 @@ double cscanScheduling(int headPosition) {
 			headPosition = minElement;
 		}
 		tracksTraversed++;
+	}
+}
+
+void generateRandomThousand() {
+	for (int i = 0; i < 1000; i++) {
+		testTrackList[i] = rand() % 200;
+	}
+}
+
+void generateSameTrackAccess() {
+	for (int i = 0; i < 1000; i++) {
+		if (i == 0) {
+			testTrackList[i] = rand() % 200;
+		} else {
+			int flag = rand() % 10;
+			if (flag == 0) {
+				testTrackList[i] = testTrackList[i - 1];
+			} else {
+				testTrackList[i] = rand() % 200;
+			}
+		}
+	}
+}
+
+void generateDistanceDecrease() {
+	int min;
+	int max;
+	for (int i = 0; i < 1000; i++) {
+		if (i == 0) {
+			testTrackList[i] = rand() % 200;
+			min = testTrackList[i];
+			max = testTrackList[i];
+		} else if (i == 1) {
+			testTrackList[i] = rand() % 200;
+			if (testTrackList[i] < min) {
+				min = testTrackList[i];
+			}
+			if (testTrackList[i] > max) {
+				max = testTrackList[i];
+			}
+		} else {
+			int flag = rand() % 100;
+			if (flag <= 1) {
+				
+			} else if (flag <= 3) {
+
+			} else if (flag <= 6) {
+
+			} else if (flag <= 12) {
+
+			} else if (flag <= 25) {
+
+			} else if (flag <= 50) {
+
+			} else {
+				
+			}
+		}
 	}
 }
 
