@@ -213,20 +213,46 @@ void generateDistanceDecrease() {
 			}
 		} else {
 			int flag = rand() % 100;
-			if (flag <= 1) {
-				
-			} else if (flag <= 3) {
-
-			} else if (flag <= 6) {
-
-			} else if (flag <= 12) {
-
-			} else if (flag <= 25) {
-
-			} else if (flag <= 50) {
-
+			int range = (testTrackList[max]-testTrackList[min]) / 7;
+			int greaterOrLess = rand() % 2;
+			if (flag < 51) {
+				testTrackList[i] = rand() % range + (testTrackList[i - 1] - (range / 2));
+			} else if (flag < 76) {
+				if (greaterOrLess == 0) {
+					testTrackList[i] = rand() % (range / 2) + (testTrackList[i - 1] - range);
+				} else {
+					testTrackList[i] = rand() % (range / 2) + (testTrackList[i - 1] + range);
+				}
+			} else if (flag < 88) {
+				if (greaterOrLess == 0) {
+					testTrackList[i] = rand() % (range / 2) + (testTrackList[i - 1] - ((range / 2) * 3));
+				} else {
+					testTrackList[i] = rand() % (range / 2) + (testTrackList[i - 1] + ((range / 2) * 3));
+				}
+			} else if (flag < 94) {
+				if (greaterOrLess == 0) {
+					testTrackList[i] = rand() % (range / 2) + (testTrackList[i - 1] - (range * 2));
+				} else {
+					testTrackList[i] = rand() % (range / 2) + (testTrackList[i - 1] + (range * 2));
+				}
+			} else if (flag < 97) {
+				if (greaterOrLess == 0) {
+					testTrackList[i] = rand() % (range / 2) + (testTrackList[i - 1] - ((range / 2) * 5));
+				} else {
+					testTrackList[i] = rand() % (range / 2) + (testTrackList[i - 1] + ((range / 2) * 5));
+				}
+			} else if (flag < 99) {
+				if (greaterOrLess == 0) {
+					testTrackList[i] = rand() % (range / 2) + (testTrackList[i - 1] - (range * 3));
+				} else {
+					testTrackList[i] = rand() % (range / 2) + (testTrackList[i - 1] + (range * 3));
+				}
 			} else {
-				
+				if (greaterOrLess == 0) {
+					testTrackList[i] = rand() % (range / 2) + (testTrackList[i - 1] - ((range / 2) * 7));
+				} else {
+					testTrackList[i] = rand() % (range / 2) + (testTrackList[i - 1] + ((range / 2) * 7));
+				}
 			}
 		}
 	}
