@@ -10,6 +10,307 @@ int testTrackList[1000];
 int trackList[] = {55, 58, 39, 18, 90, 160, 150, 38, 184};
 int diskSize = 200;
 
+
+
+int trackListHard[] = {55, 58, 39, 18, 90, 160, 150, 38, 184};
+
+//fifo scheduling policy
+double fifoSchedulingHard(int headPosition) {   
+    int tracksTraversed = 0;
+    int trackListLength = sizeof(trackListHard) / sizeof(trackListHard[0]);
+    for (int i = 0; i < trackListLength; i++) {
+        if (headPosition > trackListHard[i]) {
+            tracksTraversed += headPosition - trackListHard[i];
+        } else {
+            tracksTraversed += trackListHard[i] - headPosition;
+        }
+        headPosition = trackListHard[i];
+    }
+    return (double) tracksTraversed / trackListLength;
+}
+
+double lifoSchedulingHard(int headPosition) {
+    int tracksTraversed = 0;
+    int trackListLength = sizeof(trackListHard) / sizeof(trackListHard[0]);
+    for (int i = trackListLength - 1; i >= 0; i--) {
+        if (headPosition > trackListHard[i]) {
+            tracksTraversed += headPosition - trackListHard[i];
+        } else {
+            tracksTraversed += trackListHard[i] - headPosition;
+        }
+        headPosition = trackListHard[i];
+    }
+    return (double) tracksTraversed / trackListLength;
+}
+
+
+//sstf scheduling policy
+double sstfSchedulingHard(int headPosition) {
+	int trackListLength = sizeof(trackListHard) / sizeof(trackListHard[0]);
+	int trackListAccd[trackListLength], move[trackListLength], next[trackListLength];
+	int first, min, currentLoc, tracksTraversed = 0;
+	for (int i = 0; i < trackListLength; i++)
+	{
+		trackListAccd[i] = 0;
+	}
+	for (int i = 0; i < trackListLength; i++)
+	{
+		first = 0;
+		min = 0;
+		currentLoc = 0;
+		for (int j = 0; j < trackListLength; j++)
+		{
+			if (trackListAccd[j] == 0)
+			{
+				if (first == 0)
+				{
+					next[j] = headPosition - trackListHard[j];
+					if (next[j] < 0) {
+						next[j] = trackListHard[j] - headPosition;
+					}
+					currentLoc = j;
+					min = next[j];
+					first++;
+				}
+				else
+				{
+					next[j] = headPosition - trackListHard[j];
+					if (next[j] < 0) {
+						next[j] = trackListHard[j] - headPosition;
+					}
+				}
+				if (min > next[j]) {
+					currentLoc = j;
+					min = next[j];
+				}
+			}
+		}
+		trackListAccd[currentLoc] = 1;
+		move[i] = trackListHard[currentLoc] - headPosition;
+		if (move[i] < 0) {
+			move[i] = headPosition - trackListHard[currentLoc];
+		}
+		headPosition = trackListHard[currentLoc];
+	}
+	for (int i = 0; i < trackListLength; i++)
+	{
+		tracksTraversed = tracksTraversed + move[i];
+	}
+	return (double)tracksTraversed / trackListLength;
+}
+
+//scan scheduling policy
+double scanSchedulingHard(int headPosition) {
+	int tracksTraversed = 0;
+	int trackListLength = sizeof(trackListHard) / sizeof(trackListHard[0]);
+	int trackListAccd[trackListLength];
+	int positiveMove = 1;
+	int maxElement = 0;
+	for (int i = 0; i < trackListLength; i++) {
+		if (trackListHard[i] > maxElement) {
+			maxElement = trackListHard[i];
+		}
+	}
+	int minElement = diskSize;
+	for (int i = 0; i < trackListLength; i++) {
+		if (trackListHard[i] < minElement) {
+			minElement = trackListHard[i];
+		}
+	}
+	while (true) {
+		int tempCount = 0;
+		for (int i = 0; i < trackListLength; i++) {
+			if (headPosition == trackListHard[i] && trackListAccd[i] != 1) {
+				trackListAccd[i] = 1;
+			}
+			tempCount += trackListAccd[i];
+			if (tempCount == trackListLength) {
+				return (double)tracksTraversed / trackListLength;
+			}
+		}
+		if (headPosition < maxElement && positiveMove == 1) {
+			headPosition++;
+		}
+		else {
+			positiveMove = 0;
+			headPosition--;
+		}
+		tracksTraversed++;
+	}
+}
+
+// cscan scheduling policy
+double cscanSchedulingHard(int headPosition) {
+	int headStart = headPosition;
+	int tracksTraversed = 0;
+	int trackListLength = sizeof(trackListHard) / sizeof(trackListHard[0]);
+	int trackListAccd[trackListLength];
+	int currentMove = 0;
+	int maxElement = 0;
+	for (int i = 0; i < trackListLength; i++) {
+		if (trackListHard[i] > maxElement) {
+			maxElement = trackListHard[i];
+		}
+	}
+	int minElement = diskSize;
+	for (int i = 0; i < trackListLength; i++) {
+		if (trackListHard[i] < minElement) {
+			minElement = trackListHard[i];
+		}
+	}
+	while (true) {
+		int tempCount = 0;
+		for (int i = 0; i < trackListLength; i++) {
+			if (headPosition == trackListHard[i] && trackListAccd[i] != 1) {
+				trackListAccd[i] = 1;
+			}
+			tempCount += trackListAccd[i];
+			if (tempCount == trackListLength) {
+				return (double)tracksTraversed / trackListLength;
+			}
+		}
+		if (headPosition < maxElement) {
+			headPosition++;
+		}
+		else {
+			tracksTraversed += headPosition - minElement;
+			headPosition = minElement;
+		}
+		tracksTraversed++;
+	}
+}
+
+//scan scheduling policy edited for FSCAN
+double scanModSchedulingHard(int headPosition) {
+	int tracksTraversed = 0;
+	int trackListLength = sizeof(trackListHard) / sizeof(trackListHard[0]);
+	int trackListAccd[trackListLength];
+	int positiveMove = 1;
+	int maxElement = 0;
+	for (int i = 0; i < trackListLength; i++) {
+		if (trackListHard[i] > maxElement) {
+			maxElement = trackListHard[i];
+		}
+	}
+	int minElement = diskSize;
+	for (int i = 0; i < trackListLength; i++) {
+		if (trackListHard[i] < minElement) {
+			minElement = trackListHard[i];
+		}
+	}
+	while (true) {
+		int tempCount = 0;
+		for (int i = 0; i < trackListLength; i++) {
+			if (headPosition == trackListHard[i] && trackListAccd[i] != 1) {
+				trackListAccd[i] = 1;
+			}
+			tempCount += trackListAccd[i];
+			if (tempCount == trackListLength) {
+				return tracksTraversed;
+			}
+		}
+		if (headPosition < maxElement && positiveMove == 1) {
+			headPosition++;
+		}
+		else {
+			positiveMove = 0;
+			headPosition--;
+		}
+		tracksTraversed++;
+	}
+}
+
+//scan scheduling policy edited for N-Step
+double scanSchedulingNStepHard(int headPosition, int* queueArrayColumn, int rows) {
+    cout << ""; //leave here it breaks otherwise
+    int tempArrSize = sizeof(queueArrayColumn)/sizeof(queueArrayColumn[0]);
+	int tracksTraversed = 0;
+	int trackListLength = rows;
+	int trackListAccd[trackListLength];
+	int positiveMove = 1;
+	int maxElement = 0;
+	for (int i = 0; i < trackListLength; i++) {
+		if (*(queueArrayColumn+i) > maxElement) {
+			maxElement = *(queueArrayColumn+i);
+		}
+	}
+	int minElement = diskSize;
+	for (int i = 0; i < trackListLength; i++) {
+		if (*(queueArrayColumn+i) < minElement) {
+			minElement = *(queueArrayColumn+i);
+		}
+	}
+	while (true) {
+		int tempCount = 0;
+		for (int i = 0; i < trackListLength; i++) {
+			if (headPosition == *(queueArrayColumn+i) && trackListAccd[i] != 1) {
+				trackListAccd[i] = 1;
+			}
+			tempCount += trackListAccd[i];
+			if (tempCount == trackListLength) {
+				return tracksTraversed;
+			}
+		}
+		if (headPosition < maxElement && positiveMove == 1) {
+			headPosition++;
+		}
+		else {
+			positiveMove = 0;
+			headPosition--;
+		}
+		tracksTraversed++;
+	}
+}
+
+double nStepScanHard(int nQueues, int headPosition) {
+    int tracksTraversed = 0;
+	int trackListLength = sizeof(trackList) / sizeof(trackList[0]);
+	int columns = nQueues;
+	int rows = (trackListLength / nQueues);
+	int queueArray[columns][rows];
+	int startIndex = 1;
+	for(int i = 0; i < trackList[i]; i++) {
+        if(int(ceil(i/nQueues))<rows){ //added to prevent extra creation
+		    queueArray[int(ceil(i/nQueues))][i%nQueues] = trackList[i];		
+        }
+	}
+    int queueDecider = 0;
+    while(true) {
+        if(queueDecider < nQueues) {
+            tracksTraversed += scanSchedulingNStepHard(headPosition, queueArray[queueDecider], rows);
+			queueDecider += 1;
+        } else {
+			//THIS IS NOT RETURNING RIGHT ANSWER.
+			return (double)tracksTraversed / trackListLength;
+        }
+		
+    }
+}
+
+double FSCANHard(int headPosition) {
+    int tracksTraversed = 0;
+	int trackListLength = sizeof(trackList) / sizeof(trackList[0]);
+    bool queueDecider = true;
+    while(true) {
+        if(queueDecider) {
+            //read and run queue 1
+            tracksTraversed += scanModSchedulingHard(headPosition);
+            queueDecider = !queueDecider;
+        } else {
+            //read and run on queue 2
+            tracksTraversed += scanModSchedulingHard(headPosition);
+            queueDecider = !queueDecider;
+			return (double)tracksTraversed / trackListLength;
+        }
+		
+    }
+	
+}
+
+
+
+
+
 //fifo scheduling policy
 double fifoScheduling(int headPosition) {   
     int tracksTraversed = 0;
@@ -425,11 +726,14 @@ void generateDistanceDecrease() {
 }
 
 int main() {
-    cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
-	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
-    cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
-    cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n\n\n\n\n";
+	cout << "Table 11.2 replication and extension.\n";
+    cout << "Average seek length for FIFO scheduling is " << fifoSchedulingHard(100) << ".\n";
+	cout << "Average seek length for LIFO scheduling is " << lifoSchedulingHard(100) << ".\n";
+    cout << "Average seek length for SSTF scheduling is " << sstfSchedulingHard(100) << ".\n";
+    cout << "Average seek length for SCAN scheduling is " << scanSchedulingHard(100) << ".\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanSchedulingHard(100) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCANHard(1000) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScanHard(3, 100) << ".\n\n\n\n\n";
 
 	generateRandomThousand();
 	cout << "Simulation one with the head starting at track 0.\n";
