@@ -2,6 +2,7 @@
 #include <array>
 #include <stdlib.h>
 #include <cmath>
+#include <stack>
 
 using namespace std;
 
@@ -12,32 +13,32 @@ int diskSize = 200;
 //fifo scheduling policy
 double fifoScheduling(int headPosition) {   
     int tracksTraversed = 0;
-    int trackListLength = sizeof(trackList) / sizeof(trackList[0]);
+    int trackListLength = sizeof(testTrackList) / sizeof(testTrackList[0]);
     for (int i = 0; i < trackListLength; i++) {
-        if (headPosition > trackList[i]) {
-            tracksTraversed += headPosition - trackList[i];
+        if (headPosition > testTrackList[i]) {
+            tracksTraversed += headPosition - testTrackList[i];
         } else {
-            tracksTraversed += trackList[i] - headPosition;
+            tracksTraversed += testTrackList[i] - headPosition;
         }
-        headPosition = trackList[i];
+        headPosition = testTrackList[i];
     }
     return (double) tracksTraversed / trackListLength;
 }
 
-//lifo scheduling policy
 double lifoScheduling(int headPosition) {
     int tracksTraversed = 0;
-    int trackListLength = sizeof(trackList) / sizeof(trackList[0]);
+    int trackListLength = sizeof(testTrackList) / sizeof(testTrackList[0]);
     for (int i = trackListLength - 1; i >= 0; i--) {
-        if (headPosition > trackList[i]) {
-            tracksTraversed += headPosition - trackList[i];
+        if (headPosition > testTrackList[i]) {
+            tracksTraversed += headPosition - testTrackList[i];
         } else {
-            tracksTraversed += trackList[i] - headPosition;
+            tracksTraversed += testTrackList[i] - headPosition;
         }
-        headPosition = trackList[i];
+        headPosition = testTrackList[i];
     }
     return (double) tracksTraversed / trackListLength;
 }
+
 
 //sstf scheduling policy
 double sstfScheduling(int headPosition) {
@@ -298,7 +299,7 @@ void generateDistanceDecrease() {
 
 int main() {
     cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
-	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(199) << ".\n";
+	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
     cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
     cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n\n\n\n\n";
