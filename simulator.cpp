@@ -176,6 +176,133 @@ double cscanScheduling(int headPosition) {
 	}
 }
 
+//scan scheduling policy edited for FSCAN
+double scanModScheduling(int headPosition) {
+	int tracksTraversed = 0;
+	int trackListLength = sizeof(testTrackList) / sizeof(testTrackList[0]);
+	int trackListAccd[trackListLength];
+	int positiveMove = 1;
+	int maxElement = 0;
+	for (int i = 0; i < trackListLength; i++) {
+		if (testTrackList[i] > maxElement) {
+			maxElement = testTrackList[i];
+		}
+	}
+	int minElement = diskSize;
+	for (int i = 0; i < trackListLength; i++) {
+		if (testTrackList[i] < minElement) {
+			minElement = testTrackList[i];
+		}
+	}
+	while (true) {
+		int tempCount = 0;
+		for (int i = 0; i < trackListLength; i++) {
+			if (headPosition == testTrackList[i] && trackListAccd[i] != 1) {
+				trackListAccd[i] = 1;
+			}
+			tempCount += trackListAccd[i];
+			if (tempCount == trackListLength) {
+				return tracksTraversed;
+			}
+		}
+		if (headPosition < maxElement && positiveMove == 1) {
+			headPosition++;
+		}
+		else {
+			positiveMove = 0;
+			headPosition--;
+		}
+		tracksTraversed++;
+	}
+}
+
+//scan scheduling policy edited for N-Step
+double scanSchedulingNStep(int headPosition, int* queueArrayColumn, int rows) {
+    cout << ""; //leave here it breaks otherwise
+    int tempArrSize = sizeof(queueArrayColumn)/sizeof(queueArrayColumn[0]);
+	int tracksTraversed = 0;
+	int trackListLength = rows;
+	int trackListAccd[trackListLength];
+	int positiveMove = 1;
+	int maxElement = 0;
+	for (int i = 0; i < trackListLength; i++) {
+		if (*(queueArrayColumn+i) > maxElement) {
+			maxElement = *(queueArrayColumn+i);
+		}
+	}
+	int minElement = diskSize;
+	for (int i = 0; i < trackListLength; i++) {
+		if (*(queueArrayColumn+i) < minElement) {
+			minElement = *(queueArrayColumn+i);
+		}
+	}
+	while (true) {
+		int tempCount = 0;
+		for (int i = 0; i < trackListLength; i++) {
+			if (headPosition == *(queueArrayColumn+i) && trackListAccd[i] != 1) {
+				trackListAccd[i] = 1;
+			}
+			tempCount += trackListAccd[i];
+			if (tempCount == trackListLength) {
+				return tracksTraversed;
+			}
+		}
+		if (headPosition < maxElement && positiveMove == 1) {
+			headPosition++;
+		}
+		else {
+			positiveMove = 0;
+			headPosition--;
+		}
+		tracksTraversed++;
+	}
+}
+
+double nStepScan(int nQueues, int headPosition) {
+    int tracksTraversed = 0;
+	int trackListLength = sizeof(trackList) / sizeof(trackList[0]);
+	int columns = nQueues;
+	int rows = (trackListLength / nQueues);
+	int queueArray[columns][rows];
+	int startIndex = 1;
+	for(int i = 0; i < trackList[i]; i++) {
+        if(int(ceil(i/nQueues))<rows){ //added to prevent extra creation
+		    queueArray[int(ceil(i/nQueues))][i%nQueues] = trackList[i];		
+        }
+	}
+    int queueDecider = 0;
+    while(true) {
+        if(queueDecider < nQueues) {
+            tracksTraversed += scanSchedulingNStep(headPosition, queueArray[queueDecider], rows);
+			queueDecider += 1;
+        } else {
+			//THIS IS NOT RETURNING RIGHT ANSWER.
+			return (double)tracksTraversed / trackListLength;
+        }
+		
+    }
+}
+
+double FSCAN(int headPosition) {
+    int tracksTraversed = 0;
+	int trackListLength = sizeof(trackList) / sizeof(trackList[0]);
+    bool queueDecider = true;
+    while(true) {
+        if(queueDecider) {
+            //read and run queue 1
+            tracksTraversed += scanModScheduling(headPosition);
+            queueDecider = !queueDecider;
+        } else {
+            //read and run on queue 2
+            tracksTraversed += scanModScheduling(headPosition);
+            queueDecider = !queueDecider;
+			return (double)tracksTraversed / trackListLength;
+        }
+		
+    }
+	
+}
+
 void generateRandomThousand() {
 	for (int i = 0; i < 1000; i++) {
 		testTrackList[i] = rand() % 200;
@@ -310,19 +437,25 @@ int main() {
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(0) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(0) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(0) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(0) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 0) << ".\n\n";
 	cout << "Simulation one with the head starting at track 100.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(100) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 100) << ".\n\n";
 	cout << "Simulation one with the head starting at track 199.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(199) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(199) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(199) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(199) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n\n\n\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(199) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 199) << ".\n\n\n\n\n";
 
 	generateRandomThousand();
 	cout << "Simulation two with the head starting at track 0.\n";
@@ -330,19 +463,25 @@ int main() {
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(0) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(0) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(0) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(0) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 0) << ".\n\n";
 	cout << "Simulation two with the head starting at track 100.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(100) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 100) << ".\n\n";
 	cout << "Simulation two with the head starting at track 199.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(199) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(199) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(199) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(199) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n\n\n\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(199) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 199) << ".\n\n\n\n\n";
 
 	generateRandomThousand();
 	cout << "Simulation three with the head starting at track 0.\n";
@@ -350,19 +489,25 @@ int main() {
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(0) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(0) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(0) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(0) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 0) << ".\n\n";
 	cout << "Simulation three with the head starting at track 100.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(100) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 100) << ".\n\n";
 	cout << "Simulation three with the head starting at track 199.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(199) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(199) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(199) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(199) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n\n\n\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(199) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 199) << ".\n\n\n\n\n";
 
 	generateRandomThousand();
 	cout << "Simulation four with the head starting at track 0.\n";
@@ -370,19 +515,25 @@ int main() {
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(0) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(0) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(0) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(0) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 0) << ".\n\n";
 	cout << "Simulation four with the head starting at track 100.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(100) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 100) << ".\n\n";
 	cout << "Simulation four with the head starting at track 199.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(199) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(199) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(199) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(199) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n\n\n\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(199) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 199) << ".\n\n\n\n\n";
 
 	generateRandomThousand();
 	cout << "Simulation five with the head starting at track 0.\n";
@@ -390,19 +541,25 @@ int main() {
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(0) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(0) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(0) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(0) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 0) << ".\n\n";
 	cout << "Simulation five with the head starting at track 100.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(100) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 100) << ".\n\n";
 	cout << "Simulation five with the head starting at track 199.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(199) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(199) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(199) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(199) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n\n\n\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(199) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 199) << ".\n\n\n\n\n";
 
 
 
@@ -412,19 +569,25 @@ int main() {
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(0) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(0) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(0) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(0) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 0) << ".\n\n";
 	cout << "Simulation one with the head starting at track 100 and the probability of accessing the same track next is 10%.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(100) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 100) << ".\n\n";
 	cout << "Simulation one with the head starting at track 199 and the probability of accessing the same track next is 10%.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(199) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(199) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(199) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(199) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n\n\n\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(199) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 199) << ".\n\n\n\n\n";
 
 	generateSameTrackAccess();
 	cout << "Simulation two with the head starting at track 0 and the probability of accessing the same track next is 10%.\n";
@@ -432,19 +595,25 @@ int main() {
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(0) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(0) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(0) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(0) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 0) << ".\n\n";
 	cout << "Simulation two with the head starting at track 100 and the probability of accessing the same track next is 10%.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(100) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 100) << ".\n\n";
 	cout << "Simulation two with the head starting at track 199 and the probability of accessing the same track next is 10%.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(199) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(199) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(199) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(199) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n\n\n\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(199) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 199) << ".\n\n\n\n\n";
 
 	generateSameTrackAccess();
 	cout << "Simulation three with the head starting at track 0 and the probability of accessing the same track next is 10%.\n";
@@ -452,19 +621,25 @@ int main() {
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(0) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(0) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(0) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(0) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 0) << ".\n\n";
 	cout << "Simulation three with the head starting at track 100 and the probability of accessing the same track next is 10%.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(100) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 100) << ".\n\n";
 	cout << "Simulation three with the head starting at track 199 and the probability of accessing the same track next is 10%.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(199) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(199) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(199) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(199) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n\n\n\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(199) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 199) << ".\n\n\n\n\n";
 
 	generateSameTrackAccess();
 	cout << "Simulation four with the head starting at track 0 and the probability of accessing the same track next is 10%.\n";
@@ -472,19 +647,25 @@ int main() {
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(0) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(0) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(0) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(0) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 0) << ".\n\n";
 	cout << "Simulation four with the head starting at track 100 and the probability of accessing the same track next is 10%.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(100) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 100) << ".\n\n";
 	cout << "Simulation four with the head starting at track 199 and the probability of accessing the same track next is 10%.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(199) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(199) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(199) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(199) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n\n\n\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(199) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 199) << ".\n\n\n\n\n";
 
 	generateSameTrackAccess();
 	cout << "Simulation five with the head starting at track 0 and the probability of accessing the same track next is 10%.\n";
@@ -492,19 +673,25 @@ int main() {
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(0) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(0) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(0) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(0) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 0) << ".\n\n";
 	cout << "Simulation five with the head starting at track 100 and the probability of accessing the same track next is 10%.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(100) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 100) << ".\n\n";
 	cout << "Simulation five with the head starting at track 199 and the probability of accessing the same track next is 10%.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(199) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(199) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(199) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(199) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n\n\n\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(199) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 199) << ".\n\n\n\n\n";
 
 
 
@@ -514,19 +701,25 @@ int main() {
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(0) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(0) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(0) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(0) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 0) << ".\n\n";
 	cout << "Simulation one with the head starting at track 100 and the probability of accessing the furthest track from the current track is 1%.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(100) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 100) << ".\n\n";
 	cout << "Simulation one with the head starting at track 199 and the probability of accessing the furthest track from the current track is 1%.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(199) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(199) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(199) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(199) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n\n\n\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(199) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 199) << ".\n\n\n\n\n";
 
 	generateFarthestDistance();
 	cout << "Simulation two with the head starting at track 0 and the probability of accessing the furthest track from the current track is 1%.\n";
@@ -534,19 +727,25 @@ int main() {
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(0) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(0) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(0) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(0) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 0) << ".\n\n";
 	cout << "Simulation two with the head starting at track 100 and the probability of accessing the furthest track from the current track is 1%.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(100) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 100) << ".\n\n";
 	cout << "Simulation two with the head starting at track 199 and the probability of accessing the furthest track from the current track is 1%.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(199) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(199) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(199) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(199) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n\n\n\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(199) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 199) << ".\n\n\n\n\n";
 
 	generateFarthestDistance();
 	cout << "Simulation three with the head starting at track 0 and the probability of accessing the furthest track from the current track is 1%.\n";
@@ -554,19 +753,25 @@ int main() {
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(0) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(0) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(0) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(0) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 0) << ".\n\n";
 	cout << "Simulation three with the head starting at track 100 and the probability of accessing the furthest track from the current track is 1%.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(100) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 100) << ".\n\n";
 	cout << "Simulation three with the head starting at track 199 and the probability of accessing the furthest track from the current track is 1%.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(199) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(199) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(199) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(199) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n\n\n\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(199) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 199) << ".\n\n\n\n\n";
 
 	generateFarthestDistance();
 	cout << "Simulation four with the head starting at track 0 and the probability of accessing the furthest track from the current track is 1%.\n";
@@ -574,19 +779,25 @@ int main() {
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(0) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(0) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(0) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(0) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 0) << ".\n\n";
 	cout << "Simulation four with the head starting at track 100 and the probability of accessing the furthest track from the current track is 1%.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(100) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 100) << ".\n\n";
 	cout << "Simulation four with the head starting at track 199 and the probability of accessing the furthest track from the current track is 1%.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(199) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(199) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(199) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(199) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n\n\n\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(199) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 199) << ".\n\n\n\n\n";
 
 	generateFarthestDistance();
 	cout << "Simulation five with the head starting at track 0 and the probability of accessing the furthest track from the current track is 1%.\n";
@@ -594,19 +805,25 @@ int main() {
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(0) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(0) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(0) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(0) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 0) << ".\n\n";
 	cout << "Simulation five with the head starting at track 100 and the probability of accessing the furthest track from the current track is 1%.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(100) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 100) << ".\n\n";
 	cout << "Simulation five with the head starting at track 199 and the probability of accessing the furthest track from the current track is 1%.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(199) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(199) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(199) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(199) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n\n\n\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(199) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 199) << ".\n\n\n\n\n";
 
 
 
@@ -616,19 +833,25 @@ int main() {
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(0) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(0) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(0) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(0) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 0) << ".\n\n";
 	cout << "Simulation one with the head starting at track 100 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(100) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 100) << ".\n\n";
 	cout << "Simulation one with the head starting at track 199 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(199) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(199) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(199) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(199) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n\n\n\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(199) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 199) << ".\n\n\n\n\n";
 
 	generateDistanceDecrease();	
 	cout << "Simulation two with the head starting at track 0 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
@@ -636,19 +859,25 @@ int main() {
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(0) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(0) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(0) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(0) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 0) << ".\n\n";
 	cout << "Simulation two with the head starting at track 100 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(100) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 100) << ".\n\n";
 	cout << "Simulation two with the head starting at track 199 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(199) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(199) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(199) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(199) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n\n\n\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(199) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 199) << ".\n\n\n\n\n";
 
 	generateDistanceDecrease();
 	cout << "Simulation three with the head starting at track 0 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
@@ -656,19 +885,25 @@ int main() {
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(0) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(0) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(0) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(0) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 0) << ".\n\n";
 	cout << "Simulation three with the head starting at track 100 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(100) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 100) << ".\n\n";
 	cout << "Simulation three with the head starting at track 199 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(199) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(199) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(199) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(199) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n\n\n\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(199) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 199) << ".\n\n\n\n\n";
 
 	generateDistanceDecrease();
 	cout << "Simulation four with the head starting at track 0 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
@@ -676,19 +911,25 @@ int main() {
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(0) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(0) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(0) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(0) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 0) << ".\n\n";
 	cout << "Simulation four with the head starting at track 100 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(100) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 100) << ".\n\n";
 	cout << "Simulation four with the head starting at track 199 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(199) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(199) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(199) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(199) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n\n\n\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(199) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 199) << ".\n\n\n\n\n";
 
 	generateDistanceDecrease();
 	cout << "Simulation five with the head starting at track 0 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
@@ -696,18 +937,24 @@ int main() {
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(0) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(0) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(0) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(0) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(0) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 0) << ".\n\n";
 	cout << "Simulation five with the head starting at track 100 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(100) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(100) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(100) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(100) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(100) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(100) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 100) << ".\n\n";
 	cout << "Simulation five with the head starting at track 199 and the probability of accessing a track between the current track and the furthest track decreases as you move away from the current track.\n";
 	cout << "Average seek length for FIFO scheduling is " << fifoScheduling(199) << ".\n";
 	cout << "Average seek length for LIFO scheduling is " << lifoScheduling(199) << ".\n";
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(199) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(199) << ".\n";
-    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n\n\n\n\n";
+    cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n";
+	cout << "Average seek length for FSCAN scheduling is " << FSCAN(199) << ".\n";
+	cout << "Average seek length for N-STEP-Scan scheduling is " << nStepScan(3, 199) << ".\n\n\n\n\n";
 	cout << "done";
 }
