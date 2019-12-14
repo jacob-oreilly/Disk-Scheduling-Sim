@@ -43,7 +43,7 @@ double lifoScheduling(int headPosition) {
 double sstfScheduling(int headPosition) {
 	int trackListLength = sizeof(trackList) / sizeof(trackList[0]);
 	int trackListAccd[trackListLength], move[trackListLength], next[trackListLength];
-	int first, min, currentLoc, tracksTraversed;
+	int first, min, currentLoc, tracksTraversed = 0;
 	for (int i = 0; i < trackListLength; i++)
 	{
 		trackListAccd[i] = 0;
