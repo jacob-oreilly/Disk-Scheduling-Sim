@@ -709,4 +709,5 @@ int main() {
 	cout << "Average seek length for SSTF scheduling is " << sstfScheduling(199) << ".\n";
     cout << "Average seek length for SCAN scheduling is " << scanScheduling(199) << ".\n";
     cout << "Average seek length for CSCAN scheduling is " << cscanScheduling(199) << ".\n\n\n\n\n";
+	cout << "done";
 }
