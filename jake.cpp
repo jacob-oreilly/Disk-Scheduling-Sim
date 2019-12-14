@@ -5,37 +5,35 @@
 using namespace std;
 
 int trackList[] = {55, 58, 39, 18, 90, 160, 150, 38, 184};
-int queueTrackList[5];
 int diskSize = 200; 
 
 
 //scan scheduling policy edited for FSCAN
-double scanScheduling(int headPosition) {
+double scanModScheduling(int headPosition) {
 	int tracksTraversed = 0;
-	int trackListLength = sizeof(queueTrackList) / sizeof(queueTrackList[0]);
+	int trackListLength = sizeof(trackList) / sizeof(trackList[0]);
 	int trackListAccd[trackListLength];
 	int positiveMove = 1;
 	int maxElement = 0;
 	for (int i = 0; i < trackListLength; i++) {
-		if (queueTrackList[i] > maxElement) {
-			maxElement = queueTrackList[i];
+		if (trackList[i] > maxElement) {
+			maxElement = trackList[i];
 		}
 	}
 	int minElement = diskSize;
 	for (int i = 0; i < trackListLength; i++) {
-		if (queueTrackList[i] < minElement) {
-			minElement = queueTrackList[i];
+		if (trackList[i] < minElement) {
+			minElement = trackList[i];
 		}
 	}
 	while (true) {
 		int tempCount = 0;
 		for (int i = 0; i < trackListLength; i++) {
-			if (headPosition == queueTrackList[i] && trackListAccd[i] != 1) {
+			if (headPosition == trackList[i] && trackListAccd[i] != 1) {
 				trackListAccd[i] = 1;
 			}
 			tempCount += trackListAccd[i];
 			if (tempCount == trackListLength) {
-				// return (double)tracksTraversed / trackListLength;
 				return tracksTraversed;
 			}
 		}
@@ -76,7 +74,7 @@ double scanSchedulingNStep(int headPosition, int* queueArrayColumn, int rows) {
 			}
 			tempCount += trackListAccd[i];
 			if (tempCount == trackListLength) {
-				// return (double)tracksTraversed / trackListLength;
+                cout << "Amount traversed " << tracksTraversed << "\n";
 				return tracksTraversed;
 			}
 		}
@@ -108,7 +106,8 @@ double nStepScan(int nQueues, int headPosition) {
             tracksTraversed += scanSchedulingNStep(headPosition, queueArray[queueDecider], rows);
 			queueDecider += 1;
         } else {
-			// cout << (double)tracksTraversed / trackListLength;
+			 cout << "Tracks Traversed " << tracksTraversed << "\n";
+             cout << "Tracklist length " << trackListLength << "\n";
 			//THIS IS NOT RETURNING RIGHT ANSWER.
 			return (double)tracksTraversed / trackListLength;
         }
@@ -119,28 +118,16 @@ double nStepScan(int nQueues, int headPosition) {
 double FSCAN(int headPosition) {
     int tracksTraversed = 0;
 	int trackListLength = sizeof(trackList) / sizeof(trackList[0]);
-    int queue1[trackListLength / 2];
-    int queue2[trackListLength / 2];
-
-	for(int i = 0; i < trackListLength; i++) {
-		if((trackListLength / 2) > i) {
-			queue1[i] = trackList[i];
-			queueTrackList[i] = queue1[i];
-		} else {
-			queue2[i] = trackList[i];
-			queueTrackList[i] = queue2[i];
-		}
-	}
-	
     bool queueDecider = true;
     while(true) {
         if(queueDecider) {
-            tracksTraversed += scanScheduling(headPosition);
+            //read and run queue 1
+            tracksTraversed += scanModScheduling(headPosition);
             queueDecider = !queueDecider;
         } else {
-            tracksTraversed += scanScheduling(headPosition);
+            //read and run on queue 2
+            tracksTraversed += scanModScheduling(headPosition);
             queueDecider = !queueDecider;
-			cout << (double)tracksTraversed / trackListLength;
 			return (double)tracksTraversed / trackListLength;
         }
 		
@@ -149,7 +136,8 @@ double FSCAN(int headPosition) {
 }
 
 int main() {
-    int head = 50;
+    int head = 100;
 	cout << "fscan is " << FSCAN(head) << "\n";
-	//cout << nStepScan(3, head);
+    nStepScan(3, head);
+	//cout << "nstep is " << nStepScan(3, head) << "\n";
 }
