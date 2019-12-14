@@ -41,7 +41,7 @@ double lifoScheduling(int headPosition) {
 
 //sstf scheduling policy
 double sstfScheduling(int headPosition) {
-	int trackListLength = sizeof(trackList) / sizeof(trackList[0]);
+	int trackListLength = sizeof(testTrackList) / sizeof(testTrackList[0]);
 	int trackListAccd[trackListLength], move[trackListLength], next[trackListLength];
 	int first, min, currentLoc, tracksTraversed = 0;
 	for (int i = 0; i < trackListLength; i++)
@@ -59,9 +59,9 @@ double sstfScheduling(int headPosition) {
 			{
 				if (first == 0)
 				{
-					next[j] = headPosition - trackList[j];
+					next[j] = headPosition - testTrackList[j];
 					if (next[j] < 0) {
-						next[j] = trackList[j] - headPosition;
+						next[j] = testTrackList[j] - headPosition;
 					}
 					currentLoc = j;
 					min = next[j];
@@ -69,9 +69,9 @@ double sstfScheduling(int headPosition) {
 				}
 				else
 				{
-					next[j] = headPosition - trackList[j];
+					next[j] = headPosition - testTrackList[j];
 					if (next[j] < 0) {
-						next[j] = trackList[j] - headPosition;
+						next[j] = testTrackList[j] - headPosition;
 					}
 				}
 				if (min > next[j]) {
@@ -81,11 +81,11 @@ double sstfScheduling(int headPosition) {
 			}
 		}
 		trackListAccd[currentLoc] = 1;
-		move[i] = trackList[currentLoc] - headPosition;
+		move[i] = testTrackList[currentLoc] - headPosition;
 		if (move[i] < 0) {
-			move[i] = headPosition - trackList[currentLoc];
+			move[i] = headPosition - testTrackList[currentLoc];
 		}
-		headPosition = trackList[currentLoc];
+		headPosition = testTrackList[currentLoc];
 	}
 	for (int i = 0; i < trackListLength; i++)
 	{
@@ -97,25 +97,25 @@ double sstfScheduling(int headPosition) {
 //scan scheduling policy
 double scanScheduling(int headPosition) {
 	int tracksTraversed = 0;
-	int trackListLength = sizeof(trackList) / sizeof(trackList[0]);
+	int trackListLength = sizeof(testTrackList) / sizeof(testTrackList[0]);
 	int trackListAccd[trackListLength];
 	int positiveMove = 1;
 	int maxElement = 0;
 	for (int i = 0; i < trackListLength; i++) {
-		if (trackList[i] > maxElement) {
-			maxElement = trackList[i];
+		if (testTrackList[i] > maxElement) {
+			maxElement = testTrackList[i];
 		}
 	}
 	int minElement = diskSize;
 	for (int i = 0; i < trackListLength; i++) {
-		if (trackList[i] < minElement) {
-			minElement = trackList[i];
+		if (testTrackList[i] < minElement) {
+			minElement = testTrackList[i];
 		}
 	}
 	while (true) {
 		int tempCount = 0;
 		for (int i = 0; i < trackListLength; i++) {
-			if (headPosition == trackList[i] && trackListAccd[i] != 1) {
+			if (headPosition == testTrackList[i] && trackListAccd[i] != 1) {
 				trackListAccd[i] = 1;
 			}
 			tempCount += trackListAccd[i];
@@ -138,25 +138,25 @@ double scanScheduling(int headPosition) {
 double cscanScheduling(int headPosition) {
 	int headStart = headPosition;
 	int tracksTraversed = 0;
-	int trackListLength = sizeof(trackList) / sizeof(trackList[0]);
+	int trackListLength = sizeof(testTrackList) / sizeof(testTrackList[0]);
 	int trackListAccd[trackListLength];
 	int currentMove = 0;
 	int maxElement = 0;
 	for (int i = 0; i < trackListLength; i++) {
-		if (trackList[i] > maxElement) {
-			maxElement = trackList[i];
+		if (testTrackList[i] > maxElement) {
+			maxElement = testTrackList[i];
 		}
 	}
 	int minElement = diskSize;
 	for (int i = 0; i < trackListLength; i++) {
-		if (trackList[i] < minElement) {
-			minElement = trackList[i];
+		if (testTrackList[i] < minElement) {
+			minElement = testTrackList[i];
 		}
 	}
 	while (true) {
 		int tempCount = 0;
 		for (int i = 0; i < trackListLength; i++) {
-			if (headPosition == trackList[i] && trackListAccd[i] != 1) {
+			if (headPosition == testTrackList[i] && trackListAccd[i] != 1) {
 				trackListAccd[i] = 1;
 			}
 			tempCount += trackListAccd[i];
