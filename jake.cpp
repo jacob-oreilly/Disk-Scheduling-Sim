@@ -150,8 +150,6 @@ double FSCAN(int headPosition) {
 
 int main() {
     int head = 50;
-	//FSCAN(head);
-	cout << nStepScan(3, head);
-    // cout << "Average seek length for FIFO scheduling is " << << ".\n";
-    // cout << "Average seek length for LIFO scheduling is " << << ".\n";
+	cout << "fscan is " << FSCAN(head) << "\n";
+	//cout << nStepScan(3, head);
 }
